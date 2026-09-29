@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { ChevronDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ArrowDown, ArrowRight, ChevronDown, Upload } from "lucide-react";
 import { MenuData } from "@/types/menu";
 import { CURRENCIES, LANGUAGE_CURRENCY_MAP, LANGUAGE_NAMES, coverFor } from "@/lib/passport";
 import { loadDemo } from "@/demo";
@@ -8,7 +7,9 @@ import { loadDemo } from "@/demo";
 const API_URL = import.meta.env.PROD ? "https://menu-passport-backend.onrender.com" : "http://localhost:8000";
 
 const selectClass =
-  "field-select w-full cursor-pointer rounded-none border-b border-foil bg-transparent py-1 pr-8 text-xl text-paper hover:border-paper focus-visible:border-paper focus-visible:shadow-[0_1px_0_hsl(var(--paper))] focus-visible:outline-none";
+  "field-select w-full cursor-pointer rounded-none border-b border-ink/40 bg-transparent py-1 pr-8 text-xl text-ink hover:border-ink focus-visible:border-ink focus-visible:shadow-[0_1px_0_hsl(var(--ink))] focus-visible:outline-none";
+
+const labelClass = "text-xs uppercase tracking-[0.14em] text-pencil";
 
 function Picker({ label, value, onChange, children }: {
   label?: string;
@@ -34,13 +35,13 @@ function Picker({ label, value, onChange, children }: {
       >
         {children}
       </select>
-      <ChevronDown aria-hidden className="pointer-events-none absolute right-1 h-5 w-5 text-foil" />
+      <ChevronDown aria-hidden className="pointer-events-none absolute right-1 h-5 w-5 text-ink" />
     </span>
   );
 }
 
 interface MenuUploadProps {
-  onMenuProcessed: (data: MenuData, imageUrl: string) => void;
+  onMenuProcessed: (data: MenuData, imageUrl: string, href?: string) => void;
 }
 
 export default function MenuUpload({ onMenuProcessed }: MenuUploadProps) {
@@ -70,6 +71,7 @@ export default function MenuUpload({ onMenuProcessed }: MenuUploadProps) {
     }
     setError("");
     setSelectedFile(file);
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
     setPreviewUrl(URL.createObjectURL(file));
   };
 
@@ -119,21 +121,14 @@ export default function MenuUpload({ onMenuProcessed }: MenuUploadProps) {
       onDragLeave={(e) => {
         if (!e.currentTarget.contains(e.relatedTarget as Node)) setDragging(false);
       }}
-      className="relative min-h-dvh bg-passport text-paper transition-colors duration-500 motion-reduce:transition-none"
+      className="relative min-h-dvh bg-passport bg-[linear-gradient(rgb(0_0_0/0.35),rgb(0_0_0/0.35))] p-3 text-paper transition-colors duration-500 motion-reduce:transition-none lg:p-6"
     >
-      <button
-        type="button"
-        onClick={() => {
-          const demo = loadDemo();
-          onMenuProcessed(demo.menuData, demo.imageUrl);
-        }}
-        className="absolute right-4 top-4 rounded-full border border-foil/60 px-3 py-1 text-sm text-foil hover:border-foil hover:bg-foil/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foil"
-      >
-        See an example
-      </button>
-      <div className="mx-auto flex max-w-md flex-col px-6 pb-12 pt-16 sm:min-h-dvh sm:justify-center sm:py-20">
-        <h1 className="flex items-center gap-3 font-wordmark text-2xl min-[360px]:text-3xl tracking-[0.12em] text-foil">
-          <svg viewBox="1.5 4.5 28 23" aria-hidden="true" className="h-10 w-12 shrink-0" fill="currentColor">
+      <div className="grid overflow-hidden rounded-xl shadow-[0_30px_80px_rgb(0_0_0/0.5)] lg:min-h-[calc(100dvh-3rem)] lg:auto-rows-fr lg:grid-cols-2">
+        <section className="relative flex min-h-[calc((100dvh-1.5rem)/2)] flex-col items-center justify-center rounded-t-xl bg-passport px-6 py-10 text-center transition-colors duration-500 [view-transition-name:verso] motion-reduce:transition-none lg:min-h-0 lg:rounded-l-xl lg:rounded-tr-none lg:px-12">
+        <div aria-hidden className="pointer-events-none absolute inset-3 rounded-md border border-foil/30 lg:inset-4" />
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-black/40 lg:inset-x-auto lg:inset-y-0 lg:right-0 lg:h-auto lg:w-8 lg:bg-gradient-to-l" />
+        <h1 className="flex flex-col-reverse items-center gap-4 font-wordmark text-base uppercase tracking-[0.3em] text-foil lg:gap-14 lg:text-[1.75rem]">
+          <svg viewBox="1.5 4.5 28 23" aria-hidden="true" className="h-24 w-28 shrink-0 lg:h-40 lg:w-44" fill="currentColor">
             <g fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M5 13v13.5M28 16.5v10M16 7.5v17M7.5 16h17M8.9 11.5h14.2M8.9 20.5h14.2" />
               <circle cx="16" cy="16" r="8.5" />
@@ -144,8 +139,29 @@ export default function MenuUpload({ onMenuProcessed }: MenuUploadProps) {
           </svg>
           Menu Passport
         </h1>
-        <p className="mt-9 font-serif text-4xl font-semibold leading-[1.1]">Any menu.</p>
-        <p className="mt-3.5 text-lg tracking-[0.02em] text-paper/75">Your language and currency.</p>
+        <p className="mt-4 font-serif text-4xl font-semibold leading-[1.1] lg:mt-14 lg:text-[5rem]">Any menu.</p>
+        <p className="mt-2 text-base tracking-[0.02em] text-paper/75 lg:mt-4 lg:text-[1.75rem]">Your language and currency.</p>
+        </section>
+
+        <section className="relative flex flex-col rounded-b-xl bg-paper px-[max(1.5rem,calc(50%-14rem))] py-7 text-ink [view-transition-name:recto] lg:justify-center lg:rounded-r-xl lg:rounded-bl-none lg:px-[max(3rem,calc(50%-18rem))] lg:py-12">
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-black/30 via-black/10 via-30% lg:inset-x-auto lg:inset-y-0 lg:left-0 lg:h-auto lg:w-16 lg:bg-gradient-to-r" />
+        <div className="flex items-center justify-between">
+          <p aria-hidden className="text-sm uppercase tracking-[0.2em] text-pencil">Visa · Page 1</p>
+          <a
+            href="?demo"
+            onClick={(e) => {
+              if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+              e.preventDefault();
+              const demo = loadDemo();
+              onMenuProcessed(demo.menuData, demo.imageUrl, "?demo");
+            }}
+            className="group -m-2 flex items-center gap-1.5 rounded-sm p-2 text-sm uppercase tracking-[0.14em] text-passport focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-passport lg:absolute lg:right-6 lg:top-6"
+          >
+            <span className="-mr-[0.14em] underline-offset-4 [text-box:trim-both_cap_alphabetic] group-hover:underline">See an example</span>
+            <ArrowDown aria-hidden className="h-4 w-4 lg:hidden" />
+            <ArrowRight aria-hidden className="hidden h-4 w-4 lg:block" />
+          </a>
+        </div>
 
         <input
           type="file"
@@ -156,7 +172,7 @@ export default function MenuUpload({ onMenuProcessed }: MenuUploadProps) {
         />
         <label
           htmlFor="menu-photo"
-          className={`mt-10 flex aspect-video cursor-pointer items-center gap-4 rounded-md border p-4 hover:border-paper peer-focus-visible:ring-2 peer-focus-visible:ring-foil ${dragging ? "border-dashed border-paper" : "border-foil"}`}
+          className={`mt-4 flex aspect-video cursor-pointer items-center gap-4 rounded-md border border-dashed p-4 hover:border-ink peer-focus-visible:ring-2 peer-focus-visible:ring-passport lg:mt-6 lg:aspect-auto lg:h-44 ${dragging ? "border-ink" : "border-ink/40"}`}
         >
           {selectedFile ? (
             <>
@@ -167,17 +183,26 @@ export default function MenuUpload({ onMenuProcessed }: MenuUploadProps) {
               />
               <span className="min-w-0">
                 <span className="block truncate">{selectedFile.name}</span>
-                <span className="text-sm text-paper/70">Change photo</span>
+                <span className="text-sm text-pencil">Change photo</span>
               </span>
             </>
           ) : (
-            <span className="w-full text-center text-xl">Take or choose a photo</span>
+            <>
+              <span className="w-full text-center text-xl lg:hidden">Take or choose a photo</span>
+              <span className="hidden w-full flex-col items-center gap-2 text-center lg:flex">
+                <Upload aria-hidden className="h-8 w-8 text-passport" strokeWidth={1.5} />
+                <span className="text-xl">Drop a menu photo here</span>
+                <span className="text-sm text-pencil">
+                  or <span className="text-passport underline underline-offset-4">browse files</span>
+                </span>
+              </span>
+            </>
           )}
         </label>
 
-        <div className="mt-8 grid grid-cols-[minmax(0,1fr)_8rem] gap-6">
+        <div className="mt-8 grid grid-cols-[minmax(0,1fr)_8.5rem] gap-6 lg:grid-cols-[minmax(0,1fr)_10rem]">
           <label className="block">
-            <span className="block text-sm text-paper/70">Translate into</span>
+            <span className={`block ${labelClass}`}>Translate into</span>
             <Picker
               value={language}
               onChange={(l) => {
@@ -192,16 +217,16 @@ export default function MenuUpload({ onMenuProcessed }: MenuUploadProps) {
           </label>
 
           <div>
-            <label className="-my-3 flex cursor-pointer items-center gap-2 py-3 text-sm text-paper/70">
+            <label className={`-my-3 flex cursor-pointer items-center gap-2 py-3 ${labelClass}`}>
               <input
                 type="checkbox"
                 checked={includeCurrency}
                 onChange={(e) => setIncludeCurrency(e.target.checked)}
-                className="h-4 w-4 cursor-pointer accent-foil"
+                className="h-4 w-4 cursor-pointer accent-passport"
               />
               Show prices in
             </label>
-            <div className={includeCurrency ? "" : "[&_select]:text-paper/70"}>
+            <div className={includeCurrency ? "" : "[&_select]:text-pencil"}>
               <Picker
                 label="Currency"
                 value={currency}
@@ -224,32 +249,34 @@ export default function MenuUpload({ onMenuProcessed }: MenuUploadProps) {
             aria-describedby="agent-note"
             checked={useAgent}
             onChange={(e) => setUseAgent(e.target.checked)}
-            className="mt-1 h-4 w-4 shrink-0 cursor-pointer accent-foil"
+            className="mt-1 h-4 w-4 shrink-0 cursor-pointer accent-passport"
           />
           <span>
             Agent orchestration
-            <span id="agent-note" className="mt-1 block text-sm text-paper/70">
-              An AI agent runs OCR, translation, price conversion, and image tools, choosing each one based on what it has found so far. Will take longer than the traditional pipeline used by default.
+            <span id="agent-note" className="mt-1 block text-sm text-pencil">
+              Traditional pipeline if not selected.
             </span>
           </span>
         </label>
 
-        <Button
+        <button
+          type="button"
           onClick={handleSubmit}
           disabled={!selectedFile || isProcessing}
-          className="mt-8 h-12 w-full bg-foil text-base font-semibold text-passport ring-offset-passport hover:bg-foil/90 focus-visible:ring-foil"
+          className="mt-8 h-12 w-full rounded-md bg-passport font-semibold text-paper transition-colors hover:bg-passport/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-passport focus-visible:ring-offset-2 focus-visible:ring-offset-paper disabled:pointer-events-none disabled:opacity-50"
         >
           {isProcessing ? "Reading the menu…" : "Translate menu"}
-        </Button>
+        </button>
 
         <div aria-live="polite">
           {isProcessing && useAgent && (
-            <p className="mt-3 text-sm text-paper/70 motion-safe:animate-pulse">The agent is orchestrating the tools. This can take a minute.</p>
+            <p className="mt-3 text-sm text-pencil motion-safe:animate-pulse">The agent is orchestrating the tools. This can take a minute.</p>
           )}
           {error && (
-            <p className="mt-4 rounded-md bg-paper px-3 py-2 text-sm text-stop">{error}</p>
+            <p className="mt-4 rounded-md bg-stop/10 px-3 py-2 text-sm text-stop">{error}</p>
           )}
         </div>
+        </section>
       </div>
     </main>
   );

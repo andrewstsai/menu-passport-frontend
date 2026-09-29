@@ -14,20 +14,6 @@
     --cover: 222 37% 19%;
     --foil: 41 50% 57%;
 
-    --background: var(--paper);
-    --foreground: var(--ink);
-    --primary: var(--cover);
-    --primary-foreground: var(--paper);
-    --secondary: var(--rule);
-    --secondary-foreground: var(--ink);
-    --accent: var(--rule);
-    --accent-foreground: var(--ink);
-    --destructive: var(--stop);
-    --destructive-foreground: var(--paper);
-    --border: var(--rule);
-    --input: var(--rule);
-    --ring: var(--cover);
-
     --radius: 0.375rem;
   }
 
@@ -36,11 +22,11 @@
   [data-cover="green"] { --cover: 155 33% 17%; }
 
   * {
-    @apply border-border;
+    @apply border-rule;
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-paper text-ink font-sans antialiased;
   }
 }
 
@@ -102,4 +88,59 @@
     scrollbar-width: thin;
     scrollbar-color: hsl(var(--pencil) / 0.5) transparent;
   }
+}
+
+@keyframes leaf-lift {
+  to { transform: perspective(2400px) var(--leaf-up); }
+}
+
+@keyframes leaf-land {
+  from { transform: perspective(2400px) var(--leaf-up); }
+}
+
+::view-transition-group(verso),
+::view-transition-group(recto),
+::view-transition-old(verso),
+::view-transition-new(verso),
+::view-transition-old(recto),
+::view-transition-new(recto) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(verso),
+::view-transition-new(verso) {
+  transform-origin: right;
+  --leaf-up: rotateY(90deg);
+}
+
+::view-transition-old(recto),
+::view-transition-new(recto) {
+  transform-origin: left;
+  --leaf-up: rotateY(-90deg);
+}
+
+@media (max-width: 1023.98px) {
+  ::view-transition-old(verso),
+  ::view-transition-new(verso) {
+    transform-origin: bottom;
+    --leaf-up: rotateX(-90deg);
+  }
+
+  ::view-transition-old(recto),
+  ::view-transition-new(recto) {
+    transform-origin: top;
+    --leaf-up: rotateX(90deg);
+  }
+}
+
+:root[data-turn="forward"]::view-transition-old(recto),
+:root[data-turn="back"]::view-transition-old(verso) {
+  z-index: 1;
+  animation: leaf-lift 0.4s ease-in both;
+}
+
+:root[data-turn="forward"]::view-transition-new(verso),
+:root[data-turn="back"]::view-transition-new(recto) {
+  animation: leaf-land 0.4s 0.4s ease-out both;
 }

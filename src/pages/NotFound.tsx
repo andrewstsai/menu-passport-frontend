@@ -14,7 +14,7 @@ const NotFound = () => {
       <p className="mt-2 text-pencil">There's nothing at {location.pathname}.</p>
       <Link
         to="/"
-        className="mt-6 self-start rounded-sm font-semibold text-passport underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="mt-6 self-start rounded-sm font-semibold text-passport underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-passport"
       >
         Translate a menu
       </Link>

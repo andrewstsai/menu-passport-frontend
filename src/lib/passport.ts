@@ -82,3 +82,7 @@ export function coverFor(language: string, currency?: string): Cover {
 export function formatPrice(amount: number, currency: string) {
   return new Intl.NumberFormat(undefined, { style: "currency", currency }).format(amount);
 }
+
+export function formatAmount(amount: number, fractionDigits: number) {
+  return amount.toLocaleString(undefined, { minimumFractionDigits: fractionDigits });
+}

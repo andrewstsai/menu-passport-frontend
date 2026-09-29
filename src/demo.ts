@@ -40,11 +40,11 @@ const menuImage = () => svg(
   H,
 );
 
-const plate = (color: string) =>
+export const plate = (food?: string) =>
   svg(
     `<rect width="400" height="300" fill="#D8D2C4"/>
     <circle cx="200" cy="150" r="120" fill="#FAFAF7"/>
-    <circle cx="200" cy="150" r="80" fill="${color}"/>`,
+    <circle cx="200" cy="150" r="80" ${food ? `fill="${food}"` : `fill="none" stroke="#E4DFD4" stroke-width="3"`}/>`,
     400,
     300,
   );
