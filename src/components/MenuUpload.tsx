@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowDown, ArrowRight, ChevronDown, Upload } from "lucide-react";
+import { ArrowDown, ArrowRight, ChevronDown, Info, Upload } from "lucide-react";
 import { MenuData } from "@/types/menu";
 import { CURRENCIES, LANGUAGE_CURRENCY_MAP, LANGUAGE_NAMES, coverFor } from "@/lib/passport";
 import { loadDemo } from "@/demo";
@@ -7,7 +7,7 @@ import { loadDemo } from "@/demo";
 const API_URL = import.meta.env.PROD ? "https://menu-passport-backend.onrender.com" : "http://localhost:8000";
 
 const selectClass =
-  "field-select w-full cursor-pointer rounded-none border-b border-ink/40 bg-transparent py-1 pr-8 text-xl text-ink hover:border-ink focus-visible:border-ink focus-visible:shadow-[0_1px_0_hsl(var(--ink))] focus-visible:outline-none";
+  "field-select w-full cursor-pointer rounded-none border-b border-ink/40 bg-transparent py-1 pr-8 text-lg text-ink hover:border-ink focus-visible:border-ink focus-visible:shadow-[0_1px_0_hsl(var(--ink))] focus-visible:outline-none lg:text-xl";
 
 const labelClass = "text-xs uppercase tracking-[0.14em] text-pencil";
 
@@ -51,6 +51,7 @@ export default function MenuUpload({ onMenuProcessed }: MenuUploadProps) {
   const [currency, setCurrency] = useState("USD");
   const [includeCurrency, setIncludeCurrency] = useState(false);
   const [useAgent, setUseAgent] = useState(false);
+  const [noteOpen, setNoteOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState("");
   const [dragging, setDragging] = useState(false);
@@ -143,7 +144,7 @@ export default function MenuUpload({ onMenuProcessed }: MenuUploadProps) {
         <p className="mt-2 text-base tracking-[0.02em] text-paper/75 lg:mt-4 lg:text-[1.75rem]">Your language and currency.</p>
         </section>
 
-        <section className="relative flex flex-col rounded-b-xl bg-paper px-[max(1.5rem,calc(50%-14rem))] py-7 text-ink [view-transition-name:recto] lg:justify-center lg:rounded-r-xl lg:rounded-bl-none lg:px-[max(3rem,calc(50%-18rem))] lg:py-12">
+        <section className="relative flex flex-col min-h-[calc((100dvh-1.5rem)/2)] rounded-b-xl bg-paper px-[max(1.5rem,calc(50%-14rem))] py-6 text-ink [view-transition-name:recto] lg:min-h-0 lg:justify-center lg:rounded-r-xl lg:rounded-bl-none lg:px-[max(3rem,calc(50%-18rem))] lg:py-12">
         <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-black/30 via-black/10 via-30% lg:inset-x-auto lg:inset-y-0 lg:left-0 lg:h-auto lg:w-16 lg:bg-gradient-to-r" />
         <div className="flex items-center justify-between">
           <p aria-hidden className="text-sm uppercase tracking-[0.2em] text-pencil">Visa · Page 1</p>
@@ -172,14 +173,14 @@ export default function MenuUpload({ onMenuProcessed }: MenuUploadProps) {
         />
         <label
           htmlFor="menu-photo"
-          className={`mt-4 flex aspect-video cursor-pointer items-center gap-4 rounded-md border border-dashed p-4 hover:border-ink peer-focus-visible:ring-2 peer-focus-visible:ring-passport lg:mt-6 lg:aspect-auto lg:h-44 ${dragging ? "border-ink" : "border-ink/40"}`}
+          className={`mt-4 flex min-h-28 flex-1 cursor-pointer items-center gap-4 rounded-md border border-dashed p-3 hover:border-ink peer-focus-visible:ring-2 peer-focus-visible:ring-passport lg:mt-6 lg:h-44 lg:flex-none lg:p-4 ${dragging ? "border-ink" : "border-ink/40"}`}
         >
           {selectedFile ? (
             <>
               <img
                 src={previewUrl}
                 alt=""
-                className={`h-32 w-32 shrink-0 rounded-sm object-cover ${isProcessing ? "opacity-50" : ""}`}
+                className={`h-20 w-20 shrink-0 rounded-sm object-cover lg:h-32 lg:w-32 ${isProcessing ? "opacity-50" : ""}`}
               />
               <span className="min-w-0">
                 <span className="block truncate">{selectedFile.name}</span>
@@ -200,7 +201,7 @@ export default function MenuUpload({ onMenuProcessed }: MenuUploadProps) {
           )}
         </label>
 
-        <div className="mt-8 grid grid-cols-[minmax(0,1fr)_8.5rem] gap-6 lg:grid-cols-[minmax(0,1fr)_10rem]">
+        <div className="mt-6 grid grid-cols-[minmax(0,1fr)_8.5rem] gap-6 lg:grid-cols-[minmax(0,1fr)_10rem] lg:mt-8">
           <label className="block">
             <span className={`block ${labelClass}`}>Translate into</span>
             <Picker
@@ -243,27 +244,47 @@ export default function MenuUpload({ onMenuProcessed }: MenuUploadProps) {
           </div>
         </div>
 
-        <label className="mt-8 flex cursor-pointer gap-3">
-          <input
-            type="checkbox"
-            aria-describedby="agent-note"
-            checked={useAgent}
-            onChange={(e) => setUseAgent(e.target.checked)}
-            className="mt-1 h-4 w-4 shrink-0 cursor-pointer accent-passport"
-          />
-          <span>
+        <div className="mt-6 flex items-center lg:mt-8">
+          <label className="flex cursor-pointer items-center gap-3">
+            <input
+              type="checkbox"
+              aria-describedby="agent-note"
+              checked={useAgent}
+              onChange={(e) => setUseAgent(e.target.checked)}
+              className="h-4 w-4 shrink-0 cursor-pointer accent-passport"
+            />
             Agent orchestration
-            <span id="agent-note" className="mt-1 block text-sm text-pencil">
-              Traditional pipeline if not selected.
+          </label>
+          <span className="group relative flex">
+            <button
+              type="button"
+              aria-label="About agent orchestration"
+              aria-describedby="agent-note"
+              aria-expanded={noteOpen}
+              onClick={() => setNoteOpen(!noteOpen)}
+              onBlur={() => setNoteOpen(false)}
+              onKeyDown={(e) => e.key === "Escape" && setNoteOpen(false)}
+              className="peer rounded-full p-1 text-pencil hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-passport"
+            >
+              <Info aria-hidden className="h-4 w-4" />
+            </button>
+            <span
+              id="agent-note"
+              role="tooltip"
+              className={`absolute bottom-full left-1/2 z-10 w-64 -translate-x-1/2 pb-1 peer-focus-visible:visible [@media(hover:hover)]:group-hover:visible ${noteOpen ? "visible" : "invisible"}`}
+            >
+              <span className="block rounded-md bg-ink px-3 py-2 text-sm text-paper shadow-lg">
+                An AI agent runs OCR, translation, price conversion, and image tools, choosing each one based on what its own reasoning and context. Will take longer than the traditional pipeline used by default.
+              </span>
             </span>
           </span>
-        </label>
+        </div>
 
         <button
           type="button"
           onClick={handleSubmit}
           disabled={!selectedFile || isProcessing}
-          className="mt-8 h-12 w-full rounded-md bg-passport font-semibold text-paper transition-colors hover:bg-passport/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-passport focus-visible:ring-offset-2 focus-visible:ring-offset-paper disabled:pointer-events-none disabled:opacity-50"
+          className="mt-6 h-11 w-full rounded-md bg-passport font-semibold text-paper transition-colors hover:bg-passport/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-passport focus-visible:ring-offset-2 focus-visible:ring-offset-paper disabled:pointer-events-none disabled:opacity-50 lg:mt-8 lg:h-12"
         >
           {isProcessing ? "Reading the menu…" : "Translate menu"}
         </button>

@@ -25,6 +25,11 @@
     @apply border-rule;
   }
 
+  /* iOS Safari paints overscroll and tints its bars from the canvas; match the page's darkened cover */
+  html {
+    background: color-mix(in srgb, hsl(var(--cover)), black 35%);
+  }
+
   body {
     @apply bg-paper text-ink font-sans antialiased;
   }

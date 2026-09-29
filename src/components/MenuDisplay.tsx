@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowUp, X } from "lucide-react";
 import { MenuData, MenuItem } from "@/types/menu";
 import { formatAmount, formatPrice } from "@/lib/passport";
@@ -13,6 +13,90 @@ interface MenuDisplayProps {
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 const emptyPlate = plate();
+
+const MAX_ZOOM = 5;
+
+// Wheel/trackpad or pinch to zoom, drag to pan; the content stays clipped to the frame.
+function useZoom() {
+  const frame = useRef<HTMLElement>(null);
+  const content = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = frame.current!;
+    const inner = content.current!;
+    let s = 1, x = 0, y = 0;
+    let moved = false;
+    const pointers = new Map<number, { x: number; y: number }>();
+
+    const local = (e: { clientX: number; clientY: number }) => {
+      const r = el.getBoundingClientRect();
+      return { x: e.clientX - r.left, y: e.clientY - r.top };
+    };
+
+    // Scale around frame point (px, py), shift by (dx, dy), then keep the image covering the frame.
+    const apply = (factor: number, px: number, py: number, dx = 0, dy = 0) => {
+      const next = Math.min(MAX_ZOOM, Math.max(1, s * factor));
+      x = Math.min(0, Math.max(el.clientWidth * (1 - next), px - (px - x) * (next / s) + dx));
+      y = Math.min(0, Math.max(el.clientHeight * (1 - next), py - (py - y) * (next / s) + dy));
+      s = next;
+      inner.style.transform = `translate(${x}px, ${y}px) scale(${s})`;
+    };
+
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const delta = e.deltaMode ? e.deltaY * 16 : e.deltaY;
+      const p = local(e);
+      // Scrolling down zooms in; trackpad pinch (ctrlKey) keeps its natural direction.
+      apply(Math.exp(e.ctrlKey ? -delta * 0.01 : delta * 0.002), p.x, p.y);
+    };
+
+    const onDown = (e: PointerEvent) => {
+      if (!pointers.size) moved = false;
+      pointers.set(e.pointerId, local(e));
+    };
+
+    const onMove = (e: PointerEvent) => {
+      const prev = pointers.get(e.pointerId);
+      if (!prev) return;
+      const [a0, b0] = [...pointers.values()];
+      const p = local(e);
+      pointers.set(e.pointerId, p);
+      const [a1, b1] = [...pointers.values()];
+      if (!moved && Math.hypot(p.x - prev.x, p.y - prev.y) > 3) {
+        moved = true;
+        el.setPointerCapture(e.pointerId);
+      }
+      if (!b0) return apply(1, 0, 0, a1.x - a0.x, a1.y - a0.y);
+      const mid0 = { x: (a0.x + b0.x) / 2, y: (a0.y + b0.y) / 2 };
+      const factor = Math.hypot(a1.x - b1.x, a1.y - b1.y) / (Math.hypot(a0.x - b0.x, a0.y - b0.y) || 1);
+      apply(factor, mid0.x, mid0.y, (a1.x + b1.x) / 2 - mid0.x, (a1.y + b1.y) / 2 - mid0.y);
+    };
+
+    const onUp = (e: PointerEvent) => pointers.delete(e.pointerId);
+
+    // A drag that ends on a highlight shouldn't select it.
+    const onClick = (e: MouseEvent) => {
+      if (moved) e.stopPropagation();
+    };
+
+    el.addEventListener("wheel", onWheel, { passive: false });
+    el.addEventListener("pointerdown", onDown);
+    el.addEventListener("pointermove", onMove);
+    el.addEventListener("pointerup", onUp);
+    el.addEventListener("pointercancel", onUp);
+    el.addEventListener("click", onClick, true);
+    return () => {
+      el.removeEventListener("wheel", onWheel);
+      el.removeEventListener("pointerdown", onDown);
+      el.removeEventListener("pointermove", onMove);
+      el.removeEventListener("pointerup", onUp);
+      el.removeEventListener("pointercancel", onUp);
+      el.removeEventListener("click", onClick, true);
+    };
+  }, []);
+
+  return { frame, content };
+}
 
 function Prices({ item, fractionDigits, printedClassName }: {
   item: MenuItem;
@@ -41,6 +125,7 @@ export default function MenuDisplay({ menuData, imageUrl, onBack }: MenuDisplayP
   const count = `${items.length} ${items.length === 1 ? "dish" : "dishes"}`;
   const fractionDigits = items.some((it) => it.original_price != null && !Number.isInteger(it.original_price)) ? 2 : 0;
   const countClass = "text-sm uppercase tracking-[0.2em] text-pencil";
+  const zoom = useZoom();
 
   const hover = (i: number, fromList: boolean) => {
     setHovered(i);
@@ -78,8 +163,9 @@ export default function MenuDisplay({ menuData, imageUrl, onBack }: MenuDisplayP
           <h1 className={`${countClass} lg:hidden`}>{count}</h1>
         </header>
         <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-black/15 lg:inset-y-0 lg:left-auto lg:right-0 lg:h-auto lg:w-8 lg:bg-gradient-to-l" />
-        <figure className="relative mx-auto w-fit max-w-full">
-          <img src={imageUrl} alt="Photo of the menu" className="block h-auto max-h-[calc((100dvh-1.5rem)/2-4.5rem)] max-w-full rounded-md lg:max-h-[calc(100dvh-9rem)]" />
+        <figure ref={zoom.frame} className="relative mx-auto w-fit max-w-full touch-none select-none overflow-hidden rounded-md">
+          <div ref={zoom.content} className="relative origin-top-left">
+          <img src={imageUrl} alt="Photo of the menu" draggable={false} className="block h-auto max-h-[calc((100dvh-1.5rem)/2-4.5rem)] max-w-full rounded-md lg:max-h-[calc(100dvh-9rem)]" />
           {items.map((it, i) => {
             const { left, top, width, height } = it.bounding_box;
             const state =
@@ -101,6 +187,7 @@ export default function MenuDisplay({ menuData, imageUrl, onBack }: MenuDisplayP
               />
             );
           })}
+          </div>
         </figure>
         </div>
 
@@ -144,13 +231,13 @@ export default function MenuDisplay({ menuData, imageUrl, onBack }: MenuDisplayP
                   </p>
                 </>
               ) : (
-                <p className="text-pencil">Hover over or click a dish on the menu photo or in the list to see it here.</p>
+                <p className="text-pencil">Hover over or click a dish on the menu photo or in the list to see it here. Scroll or pinch over the photo to zoom, and drag to move around.</p>
               )}
             </div>
           </section>
 
           <h2 className="sr-only">Dishes</h2>
-          <p className="mb-3 text-sm text-pencil lg:hidden">Tap a dish on the menu photo or in the list to see it.</p>
+          <p className="mb-3 text-sm text-pencil lg:hidden">Tap a dish on the menu photo or in the list to see it.<br />Pinch the photo to zoom.</p>
           <ul className="divide-y border-y min-h-0 overflow-y-auto overscroll-contain scrollbar-thin">
             {items.map((it, i) => (
               <li key={i}>
