@@ -59,9 +59,10 @@ export default function MenuUpload({ onMenuProcessed }: MenuUploadProps) {
   useEffect(() => {
     const root = document.documentElement;
     root.dataset.cover = coverFor(language, includeCurrency ? currency : undefined);
+    const [h, s, l] = getComputedStyle(root).getPropertyValue("--cover").trim().split(" ");
     document
       .querySelector('meta[name="theme-color"]')
-      ?.setAttribute("content", `hsl(${getComputedStyle(root).getPropertyValue("--cover").trim()})`);
+      ?.setAttribute("content", `hsl(${h} ${s} ${parseFloat(l) * 0.65}%)`);
   }, [language, currency, includeCurrency]);
 
   const selectFile = (file?: File) => {
@@ -93,14 +94,14 @@ export default function MenuUpload({ onMenuProcessed }: MenuUploadProps) {
           body: formData,
         });
       } catch {
-        throw new Error("Couldn't reach the server. It may be starting up, so try again in about 30 seconds.");
+        throw new Error("Couldn't reach the server. It may be starting up, try again in a minute.");
       }
       if (!response.ok) {
-        throw new Error(`The menu couldn't be read (error ${response.status}). Try again, or use a sharper photo.`);
+        throw new Error(`The menu couldn't be read (error ${response.status}).`);
       }
       const { data } = await response.json();
       if (!data?.menu_items?.length) {
-        throw new Error("No dishes found in this photo. Try a closer, straight-on shot of the menu.");
+        throw new Error("No dishes found in this photo.");
       }
       onMenuProcessed({ menu_items: data.menu_items, metadata: data.metadata }, previewUrl);
     } catch (err) {
@@ -122,7 +123,7 @@ export default function MenuUpload({ onMenuProcessed }: MenuUploadProps) {
       onDragLeave={(e) => {
         if (!e.currentTarget.contains(e.relatedTarget as Node)) setDragging(false);
       }}
-      className="relative min-h-dvh bg-passport bg-[linear-gradient(rgb(0_0_0/0.35),rgb(0_0_0/0.35))] p-3 text-paper transition-colors duration-500 motion-reduce:transition-none lg:p-6"
+      className="relative min-h-dvh bg-passport bg-[linear-gradient(rgb(0_0_0/0.35),rgb(0_0_0/0.35))] p-edge text-paper transition-colors duration-500 motion-reduce:transition-none"
     >
       <div className="grid overflow-hidden rounded-xl shadow-[0_30px_80px_rgb(0_0_0/0.5)] lg:min-h-[calc(100dvh-3rem)] lg:auto-rows-fr lg:grid-cols-2">
         <section className="relative flex min-h-[calc((100dvh-1.5rem)/2)] flex-col items-center justify-center rounded-t-xl bg-passport px-6 py-10 text-center transition-colors duration-500 [view-transition-name:verso] motion-reduce:transition-none lg:min-h-0 lg:rounded-l-xl lg:rounded-tr-none lg:px-12">

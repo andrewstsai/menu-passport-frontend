@@ -9,7 +9,7 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center px-6">
+    <main className="flex min-h-dvh flex-col justify-center bg-paper px-[max(1.5rem,calc(50%-12.5rem))]">
       <h1 className="font-serif text-3xl font-semibold">Page not found</h1>
       <p className="mt-2 text-pencil">There's nothing at {location.pathname}.</p>
       <Link

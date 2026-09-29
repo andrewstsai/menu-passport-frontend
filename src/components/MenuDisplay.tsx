@@ -16,7 +16,6 @@ const emptyPlate = plate();
 
 const MAX_ZOOM = 5;
 
-// Wheel/trackpad or pinch to zoom, drag to pan; the content stays clipped to the frame.
 function useZoom() {
   const frame = useRef<HTMLElement>(null);
   const content = useRef<HTMLDivElement>(null);
@@ -33,7 +32,6 @@ function useZoom() {
       return { x: e.clientX - r.left, y: e.clientY - r.top };
     };
 
-    // Scale around frame point (px, py), shift by (dx, dy), then keep the image covering the frame.
     const apply = (factor: number, px: number, py: number, dx = 0, dy = 0) => {
       const next = Math.min(MAX_ZOOM, Math.max(1, s * factor));
       x = Math.min(0, Math.max(el.clientWidth * (1 - next), px - (px - x) * (next / s) + dx));
@@ -46,7 +44,6 @@ function useZoom() {
       e.preventDefault();
       const delta = e.deltaMode ? e.deltaY * 16 : e.deltaY;
       const p = local(e);
-      // Scrolling down zooms in; trackpad pinch (ctrlKey) keeps its natural direction.
       apply(Math.exp(e.ctrlKey ? -delta * 0.01 : delta * 0.002), p.x, p.y);
     };
 
@@ -74,7 +71,6 @@ function useZoom() {
 
     const onUp = (e: PointerEvent) => pointers.delete(e.pointerId);
 
-    // A drag that ends on a highlight shouldn't select it.
     const onClick = (e: MouseEvent) => {
       if (moved) e.stopPropagation();
     };
@@ -142,7 +138,7 @@ export default function MenuDisplay({ menuData, imageUrl, onBack }: MenuDisplayP
   });
 
   return (
-    <div className="h-dvh bg-passport bg-[linear-gradient(rgb(0_0_0/0.35),rgb(0_0_0/0.35))] p-3 lg:p-6">
+    <div className="h-dvh bg-passport bg-[linear-gradient(rgb(0_0_0/0.35),rgb(0_0_0/0.35))] p-edge">
       <div className="relative flex h-full flex-col overflow-hidden rounded-xl shadow-[0_30px_80px_rgb(0_0_0/0.5)]">
       <main className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_minmax(0,1fr)] lg:grid-cols-2 lg:grid-rows-[minmax(0,1fr)]">
         <div className="relative flex items-center justify-center rounded-t-xl bg-paper px-4 pb-4 pt-14 [view-transition-name:verso] lg:rounded-l-xl lg:rounded-tr-none lg:px-10 lg:pb-8 lg:pt-16">
@@ -195,7 +191,7 @@ export default function MenuDisplay({ menuData, imageUrl, onBack }: MenuDisplayP
           <h1 className={`absolute right-10 top-0 hidden h-14 items-center lg:flex ${countClass}`}>{count}</h1>
           <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-6 bg-gradient-to-b from-black/15 lg:inset-y-0 lg:right-auto lg:h-auto lg:w-8 lg:bg-gradient-to-r" />
           <section
-            className={`fixed inset-x-3 z-20 rounded-lg border shadow-[0_8px_24px_hsl(var(--ink)/0.12)] ${sheetAtTop ? "top-[4.25rem] max-h-[calc(50dvh-5rem)]" : "bottom-3 max-h-[45dvh]"} ${item?.image_url ? "grid-cols-[9rem_minmax(0,1fr)]" : ""} ${item ? "grid" : "hidden lg:grid"} gap-4 overflow-y-auto scrollbar-thin bg-paper p-4 lg:static lg:mb-6 lg:shrink-0 lg:grid-cols-[12rem_minmax(0,1fr)] lg:rounded-lg lg:border lg:shadow-none`}
+            className={`fixed left-[max(0.75rem,env(safe-area-inset-left))] right-[max(0.75rem,env(safe-area-inset-right))] z-20 rounded-lg border shadow-[0_8px_24px_hsl(var(--ink)/0.12)] ${sheetAtTop ? "top-[4.25rem] max-h-[calc(50dvh-5rem)]" : "bottom-[max(0.75rem,env(safe-area-inset-bottom))] max-h-[45dvh]"} ${item?.image_url ? "grid-cols-[9rem_minmax(0,1fr)]" : ""} ${item ? "grid" : "hidden lg:grid"} gap-4 overflow-y-auto scrollbar-thin bg-paper p-4 lg:static lg:mb-6 lg:shrink-0 lg:grid-cols-[12rem_minmax(0,1fr)] lg:rounded-lg lg:border lg:shadow-none`}
           >
             {item?.image_url ? (
               <img

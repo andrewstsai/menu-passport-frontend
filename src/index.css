@@ -25,17 +25,27 @@
     @apply border-rule;
   }
 
-  /* iOS Safari paints overscroll and tints its bars from the canvas; match the page's darkened cover */
-  html {
+  html,
+  body {
     background: color-mix(in srgb, hsl(var(--cover)), black 35%);
   }
 
   body {
-    @apply bg-paper text-ink font-sans antialiased;
+    @apply text-ink font-sans antialiased;
   }
 }
 
 @layer components {
+  .p-edge {
+    --edge: 0.75rem;
+    padding: max(var(--edge), env(safe-area-inset-top)) max(var(--edge), env(safe-area-inset-right))
+      max(var(--edge), env(safe-area-inset-bottom)) max(var(--edge), env(safe-area-inset-left));
+  }
+
+  @media (min-width: 1024px) {
+    .p-edge { --edge: 1.5rem; }
+  }
+
   .field-select {
     appearance: none;
   }
