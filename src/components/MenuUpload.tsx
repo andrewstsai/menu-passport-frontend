@@ -129,15 +129,7 @@ export default function MenuUpload({ onMenuProcessed }: MenuUploadProps) {
         <div aria-hidden className="pointer-events-none absolute inset-3 rounded-md border border-foil/30 lg:inset-4" />
         <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-black/40 lg:inset-x-auto lg:inset-y-0 lg:right-0 lg:h-auto lg:w-8 lg:bg-gradient-to-l" />
         <h1 className="flex flex-col-reverse items-center gap-4 font-wordmark text-base uppercase tracking-[0.3em] text-foil lg:gap-14 lg:text-[1.75rem]">
-          <svg viewBox="1.5 4.5 28 23" aria-hidden="true" className="h-24 w-28 shrink-0 lg:h-40 lg:w-44" fill="currentColor">
-            <g fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M5 13v13.5M28 16.5v10M16 7.5v17M7.5 16h17M8.9 11.5h14.2M8.9 20.5h14.2" />
-              <circle cx="16" cy="16" r="8.5" />
-              <ellipse cx="16" cy="16" rx="4.25" ry="8.5" />
-            </g>
-            <path d="M2.5 10V6.05a.55.55 0 0 1 1.1 0V9.5a.425.425 0 0 0 .85 0V6.05a.55.55 0 0 1 1.1 0V9.5a.425.425 0 0 0 .85 0V6.05a.55.55 0 0 1 1.1 0V10c0 2-1.75 2.5-1.75 3.5h-1.5c0-1-1.75-1.5-1.75-3.5z" />
-            <path d="M28.75 17V5.75c0-.5-.5-.65-.85-.35C26.4 6.8 25.5 9.5 25.5 13.5c0 1.5.5 2.5 1.75 3.5z" />
-          </svg>
+          <img src="/logo.svg" alt="" className="h-24 w-auto shrink-0 lg:h-40" />
           Menu Passport
         </h1>
         <p className="mt-4 font-serif text-4xl font-semibold leading-[1.1] lg:mt-14 lg:text-[5rem]">Any menu.</p>
