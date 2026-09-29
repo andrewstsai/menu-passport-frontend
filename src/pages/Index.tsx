@@ -2,10 +2,13 @@ import { useState } from "react";
 import MenuUpload from "@/components/MenuUpload";
 import MenuDisplay from "@/components/MenuDisplay";
 import { MenuData } from "@/types/menu";
+import { loadDemo } from "@/demo";
+
+const demo = new URLSearchParams(location.search).has("demo") ? loadDemo() : null;
 
 const Index = () => {
-  const [menuData, setMenuData] = useState<MenuData | null>(null);
-  const [imageUrl, setImageUrl] = useState<string>("");
+  const [menuData, setMenuData] = useState<MenuData | null>(demo?.menuData ?? null);
+  const [imageUrl, setImageUrl] = useState<string>(demo?.imageUrl ?? "");
 
   const handleMenuProcessed = (data: MenuData, url: string) => {
     setMenuData(data);
@@ -17,14 +20,10 @@ const Index = () => {
     setImageUrl("");
   };
 
-  return (
-    <div className="min-h-screen bg-background py-12 px-4">
-      {!menuData ? (
-        <MenuUpload onMenuProcessed={handleMenuProcessed} />
-      ) : (
-        <MenuDisplay menuData={menuData} imageUrl={imageUrl} onBack={handleBack} />
-      )}
-    </div>
+  return !menuData ? (
+    <MenuUpload onMenuProcessed={handleMenuProcessed} />
+  ) : (
+    <MenuDisplay menuData={menuData} imageUrl={imageUrl} onBack={handleBack} />
   );
 };
 

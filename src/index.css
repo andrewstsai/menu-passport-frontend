@@ -4,47 +4,102 @@
 
 @layer base {
   :root {
-    --background: 210 50% 13%;
-    --foreground: 43 74% 66%;
+    --paper: 80 11% 95%;
+    --ink: 221 28% 16%;
+    --pencil: 219 9% 43%;
+    --rule: 214 10% 86%;
+    --highlighter: 50 100% 65%;
+    --stop: 4 76% 40%;
 
-    --card: 210 50% 13%;
-    --card-foreground: 43 74% 66%;
+    --cover: 222 37% 19%;
+    --foil: 41 50% 57%;
 
-    --popover: 210 50% 15%;
-    --popover-foreground: 43 74% 66%;
+    --background: var(--paper);
+    --foreground: var(--ink);
+    --primary: var(--cover);
+    --primary-foreground: var(--paper);
+    --secondary: var(--rule);
+    --secondary-foreground: var(--ink);
+    --accent: var(--rule);
+    --accent-foreground: var(--ink);
+    --destructive: var(--stop);
+    --destructive-foreground: var(--paper);
+    --border: var(--rule);
+    --input: var(--rule);
+    --ring: var(--cover);
 
-    --primary: 210 70% 35%;
-    --primary-foreground: 43 74% 66%;
-
-    --secondary: 210 60% 25%;
-    --secondary-foreground: 43 74% 66%;
-
-    --muted: 210 40% 20%;
-    --muted-foreground: 43 50% 50%;
-
-    --accent: 43 74% 56%;
-    --accent-foreground: 210 50% 13%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 210 40% 25%;
-    --input: 210 40% 25%;
-    --ring: 43 74% 56%;
-
-    --radius: 0.75rem;
-    
-    --shadow-elegant: 0 10px 40px -10px hsl(43 74% 56% / 0.3);
-    --shadow-soft: 0 4px 20px -4px hsl(0 0% 0% / 0.3);
+    --radius: 0.375rem;
   }
-}
 
-@layer base {
+  [data-cover="burgundy"] { --cover: 351 56% 23%; }
+  [data-cover="red"] { --cover: 0 63% 29%; }
+  [data-cover="green"] { --cover: 155 33% 17%; }
+
   * {
     @apply border-border;
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}
+
+@layer components {
+  .field-select {
+    appearance: none;
+  }
+
+  .field-select option {
+    background: hsl(var(--paper));
+    color: hsl(var(--ink));
+  }
+
+  @supports (appearance: base-select) {
+    .field-select,
+    .field-select::picker(select) {
+      appearance: base-select;
+    }
+
+    .field-select::picker-icon {
+      display: none;
+    }
+
+    .field-select::picker(select) {
+      position-area: block-end span-inline-end;
+      position-try-fallbacks: none;
+      margin-top: 4px;
+      max-height: min(20rem, calc(100% - 12px));
+      padding: 4px;
+      border: 1px solid hsl(var(--rule));
+      border-radius: var(--radius);
+      background: hsl(var(--paper));
+      box-shadow: 0 12px 32px hsl(var(--ink) / 0.25);
+      scrollbar-width: thin;
+      scrollbar-color: hsl(var(--pencil) / 0.5) transparent;
+    }
+
+    .field-select option {
+      padding: 0.5rem 0.75rem;
+      border-radius: calc(var(--radius) - 2px);
+      font-size: 1rem;
+    }
+
+    .field-select option:hover,
+    .field-select option:focus-visible {
+      background: hsl(var(--rule));
+      outline: none;
+    }
+
+    .field-select option:checked {
+      background: hsl(var(--cover));
+      color: hsl(var(--paper));
+    }
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--pencil) / 0.5) transparent;
   }
 }
